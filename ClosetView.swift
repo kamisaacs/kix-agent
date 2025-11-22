@@ -61,6 +61,8 @@ struct ClosetView: View {
                         isShowingPicker = true
                     } label: {
                         Image(systemName: "plus")
+                            .frame(width: 24, height: 24)
+                            .contentShape(Rectangle())
                     }
                 }
             }

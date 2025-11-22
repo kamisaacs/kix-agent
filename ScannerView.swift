@@ -103,8 +103,8 @@ struct ScannerView: View {
             }
             .navigationTitle("Compatibility Checker")
             .toolbar {
-                if viewModel.scannedImage != nil {
-                    ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if viewModel.scannedImage != nil {
                         Button("Clear") {
                             viewModel.clearScan()
                             selectedItem = nil

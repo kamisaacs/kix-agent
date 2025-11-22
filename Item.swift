@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Foundation
 
 enum ClothingCategory: String, Codable, CaseIterable, Identifiable {
     case sneaker = "Sneaker"

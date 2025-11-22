@@ -9,21 +9,31 @@ class ColorService {
     /// - Parameter image: The source UIImage.
     /// - Returns: The dominant Color.
     static func extractDominantColor(from image: UIImage) -> Color {
-        // TODO: Implement real dominant color extraction (e.g., using k-means clustering or CoreImage).
-        // For now, we return a mock color or a simple average to keep it runnable.
-        // A simple way to get *a* color is to resize to 1x1 and pick that pixel.
+        // Resize image to 1x1 to get average color
+        let size = CGSize(width: 1, height: 1)
+        let renderer = UIGraphicsImageRenderer(size: size)
         
-        guard let inputImage = CIImage(image: image) else { return .gray }
-        let extentVector = CIVector(x: inputImage.extent.origin.x, y: inputImage.extent.origin.y, z: inputImage.extent.size.width, w: inputImage.extent.size.height)
-
-        guard let filter = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: inputImage, kCIInputExtentKey: extentVector]) else { return .gray }
-        guard let outputImage = filter.outputImage else { return .gray }
-
-        var bitmap = [UInt8](repeating: 0, count: 4)
-        let context = CIContext(options: [.workingColorSpace: kCFNull!])
-        context.render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: .RGBA8, colorSpace: nil)
-
-        return Color(red: Double(bitmap[0]) / 255.0, green: Double(bitmap[1]) / 255.0, blue: Double(bitmap[2]) / 255.0, opacity: Double(bitmap[3]) / 255.0)
+        let resizedImage = renderer.image { context in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        
+        guard let cgImage = resizedImage.cgImage,
+              let dataProvider = cgImage.dataProvider,
+              let data = dataProvider.data,
+              let ptr = CFDataGetBytePtr(data) else {
+            return .gray
+        }
+        
+        // CGImage data is usually RGBA or similar, but UIGraphicsImageRenderer usually produces sRGB
+        // We assume standard 8-bit per component.
+        // Note: This is a simplified extraction.
+        
+        let r = CGFloat(ptr[0]) / 255.0
+        let g = CGFloat(ptr[1]) / 255.0
+        let b = CGFloat(ptr[2]) / 255.0
+        let a = CGFloat(ptr[3]) / 255.0
+        
+        return Color(red: Double(r), green: Double(g), blue: Double(b), opacity: Double(a))
     }
     
     // MARK: - Color Matching Logic
